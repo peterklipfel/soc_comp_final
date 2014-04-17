@@ -5,7 +5,7 @@ from collections import defaultdict
 
 import numpy.numarray as na
 
-from pylab import *
+import pylab as pl
 
 order_preserving_hash = {}
 order_preserving_hash = defaultdict(lambda: 0, order_preserving_hash)
@@ -29,19 +29,16 @@ sorted_ordered_hash = sorted_ordered_hash[::-1]
 labels = [i[0] for i in sorted_ordered_hash]
 data = [i[1] for i in sorted_ordered_hash]
 
-print labels
-print data
-
 xlocations = na.array(range(len(data)))+0.5
 width = 0.5
-bar(xlocations, data, width=width)
-yticks(range(0, sorted_ordered_hash[0][1]))
-xticks(xlocations+ width/2, labels)
-xlim(0, xlocations[-1]+width*2)
-title("Average Ratings on the Training Set")
-gca().get_xaxis().tick_bottom()
-gca().get_yaxis().tick_left()
+pl.bar(xlocations, data, width=width)
+pl.yticks(range(0, sorted_ordered_hash[0][1]))
+pl.xticks(xlocations+ width/2, labels, rotation=70)
+pl.xlim(0, xlocations[-1]+width*2)
+pl.title("Order preserving word cooccurrence")
+pl.gca().get_xaxis().tick_bottom()
+pl.gca().get_yaxis().tick_left()
 
-savefig('cooccurringwords.pdf')
+pl.savefig('cooccurringwords.pdf', bbox_inches='tight', pad_inches = 3.0)
 
 
