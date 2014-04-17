@@ -62,18 +62,18 @@ def network(graph, labels=None, graph_layout='shell',
 
   # add edges
   for edge in graph:
-      G.add_edge(edge[0], edge[1])
+    G.add_edge(edge[0], edge[1])
 
   # these are different layouts for the network you may try
   # shell seems to work best
   if graph_layout == 'spring':
-      graph_pos=nx.spring_layout(G)
+    graph_pos=nx.spring_layout(G, iterations=500)
   elif graph_layout == 'spectral':
-      graph_pos=nx.spectral_layout(G)
+    graph_pos=nx.spectral_layout(G)
   elif graph_layout == 'random':
-      graph_pos=nx.random_layout(G)
+    graph_pos=nx.random_layout(G)
   else:
-      graph_pos=nx.shell_layout(G)
+    graph_pos=nx.shell_layout(G)
 
   # draw graph
   nx.draw_networkx_nodes(G,graph_pos,node_size=node_size, 
@@ -84,7 +84,7 @@ def network(graph, labels=None, graph_layout='shell',
                           font_family=text_font)
 
   if labels is None:
-      labels = range(len(graph))
+    labels = range(len(graph))
 
   edge_labels = dict(zip(graph, labels))
   nx.draw_networkx_edge_labels(G, graph_pos, edge_labels=edge_labels, 
@@ -93,5 +93,5 @@ def network(graph, labels=None, graph_layout='shell',
   # show graph
   pl.savefig('cooccurringwords.pdf')
 
-network(get_order_preserving_list())
+network(get_order_preserving_list(), graph_layout="spring", node_size=2500, node_text_size=10)
 # bar_graph()
