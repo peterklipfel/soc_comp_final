@@ -11,7 +11,7 @@ previous_word_and_freq = dict()
 # Change this number to tweak how much a term's popularity must be increasing in order to be added
 exponent_threshold = 10
 
-# Keeps track of the tweets each 10 minute period
+# Keeps track of the tweets each time period
 tweet_count = 0
 
 # "Stop Words" to ignore in search
