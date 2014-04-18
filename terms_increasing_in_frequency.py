@@ -26,7 +26,7 @@ with open("All_Tweets.csv", "rb") as infile:
       tweet_count += 1
       tweet_time = datetime.strptime(line[0].replace("+0000 ", ""), "%a %b %d %H:%M:%S %Y")
       # Remove special characters
-      tweet_body = re.sub('[^A-Za-z0-9 ]+', '', line[1]).lower()
+      tweet_body = re.sub('[^\w .]+', '', line[1]).lower()
  
       # Grab the intial time of the first tweet
       if (i == 0):
@@ -52,7 +52,7 @@ with open("All_Tweets.csv", "rb") as infile:
                   prev_freq_rate = (float(prev_freq) / tweet_count)
                   # If the rate of occurance for the word is increasing by a significant amount, add it to the list
                   if freq_rate > (prev_freq_rate * exponent_threshold) and freq_rate > .10:
-                     print "Frequency of word %s is increasing.  %.1f%% -> %.1f%% of tweets" % (word, prev_freq_rate * 100, freq_rate * 100)
+                     print "Frequency of word %s is increasing.  %.1f%% -> %.1f%% occurence" % (word, prev_freq_rate * 100, freq_rate * 100)
                      important_terms_to_watch.append(word)
          # Reset variables for the next time interval
 #         print "%d tweets during time period of %s to %s" % (tweet_count, initial_time, tweet_time)
