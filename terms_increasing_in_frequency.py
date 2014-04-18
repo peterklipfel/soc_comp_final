@@ -51,8 +51,8 @@ with open("All_Tweets.csv", "rb") as infile:
                   freq_rate = (float(freq) / tweet_count)
                   prev_freq_rate = (float(prev_freq) / tweet_count)
                   # If the rate of occurance for the word is increasing by a significant amount, add it to the list
-                  if freq_rate > (prev_freq_rate * exponent_threshold) and freq_rate > .10:
-                     print "Frequency of word %s is increasing.  %.1f%% -> %.1f%% occurence" % (word, prev_freq_rate * 100, freq_rate * 100)
+                  if freq_rate > (prev_freq_rate * exponent_threshold) and freq_rate > .1:
+                     print "Frequency of word %s is increasing.  %.1f%% -> %.1f%% occurrence rate" % (word, prev_freq_rate * 100, freq_rate * 100)
                      important_terms_to_watch.append(word)
          # Reset variables for the next time interval
 #         print "%d tweets during time period of %s to %s" % (tweet_count, initial_time, tweet_time)
