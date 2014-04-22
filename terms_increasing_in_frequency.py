@@ -21,8 +21,8 @@ stop_words = open("english.stop").read().splitlines() + open("spanish.stop").rea
 important_terms_to_watch = []
 with open("All_Tweets.csv", "rb") as infile:
    reader = csv.reader(infile, delimiter=",")
+   infile.readline()
    for i,line in enumerate(reader):
-
       tweet_count += 1
       tweet_time = datetime.strptime(line[0].replace("+0000 ", ""), "%a %b %d %H:%M:%S %Y")
       # Remove special characters
