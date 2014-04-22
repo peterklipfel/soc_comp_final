@@ -21,6 +21,7 @@ stop_words = open("english.stop").read().splitlines() + open("spanish.stop").rea
 important_terms_to_watch = []
 with open("All_Tweets.csv", "rb") as infile:
    reader = csv.reader(infile, delimiter=",")
+   # Ignore first line of csv
    infile.readline()
    for i,line in enumerate(reader):
       tweet_count += 1
@@ -52,10 +53,10 @@ with open("All_Tweets.csv", "rb") as infile:
                   prev_freq_rate = (float(prev_freq) / tweet_count)
                   # If the rate of occurance for the word is increasing by a significant amount, add it to the list
                   if freq_rate > (prev_freq_rate * exponent_threshold) and freq_rate > .1:
-                     print "Frequency of word %s is increasing.  %.1f%% -> %.1f%% occurrence rate" % (word, prev_freq_rate * 100, freq_rate * 100)
-                     important_terms_to_watch.append(word)
+                     if word not in important_terms_to_watch:
+                        print "Frequency of word %s is increasing.  %.1f%% -> %.1f%% occurrence rate" % (word, prev_freq_rate * 100, freq_rate * 100)
+                        important_terms_to_watch.append(word)
          # Reset variables for the next time interval
-#         print "%d tweets during time period of %s to %s" % (tweet_count, initial_time, tweet_time)
          previous_word_and_freq = word_and_freq
          word_and_freq = dict() 
          initial_time = tweet_time
