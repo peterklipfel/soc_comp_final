@@ -1,25 +1,33 @@
 #!/usr/bin/env python
 import fileinput
+import csv
+import re
+from datetime import datetime
 
 # Key value pairs that keep track of each word and the number of times it occurs
 word_and_freq = dict()
 previous_word_and_freq = dict()
 
-# Change this number to tweak how much a term's popularity must be increasing in order to be adde
-exponent_threshold = 1.5
+# Change this number to tweak how much a term's popularity must be increasing in order to be added
+exponent_threshold = 10
 
-# Keeps track of the tweets each 10 minute period
+# Keeps track of the tweets each time period
 tweet_count = 0
+
+# "Stop Words" to ignore in search
+stop_words = open("english.stop").read().splitlines() + open("spanish.stop").read().splitlines() + ["rt"]
 
 # Array that will carry all the terms that will eventually be added to the search
 important_terms_to_watch = []
-with open("rough_example_data.csv") as infile:
-   for i,line in enumerate(infile):
+with open("All_Tweets.csv", "rb") as infile:
+   reader = csv.reader(infile, delimiter=",")
+   # Ignore first line of csv
+   infile.readline()
+   for i,line in enumerate(reader):
       tweet_count += 1
-      # Get the fields from the csv
-      csv_fields = line.split(",")
-      tweet_time = int(csv_fields[0])
-      tweet_body = csv_fields[2].replace("\"", "")
+      tweet_time = datetime.strptime(line[0].replace("+0000 ", ""), "%a %b %d %H:%M:%S %Y")
+      # Remove special characters
+      tweet_body = re.sub('[^\w .]+', '', line[1]).lower()
  
       # Grab the intial time of the first tweet
       if (i == 0):
@@ -27,13 +35,15 @@ with open("rough_example_data.csv") as infile:
 
       # Go through each word and increase it's frequency count
       for word in tweet_body.split():
-         if word not in word_and_freq:
-            word_and_freq[word] = 1
-         else:
-            word_and_freq[word] += 1
+         # ignore stop words
+         if word not in stop_words:
+            if word not in word_and_freq:
+               word_and_freq[word] = 1
+            else:
+               word_and_freq[word] += 1
   
-      # After 10 minutes have past, compart the terms 
-      if ((tweet_time - initial_time) == 10):
+      # After time interval has passed, compare the terms 
+      if ((tweet_time - initial_time).seconds > (3 * 60 * 60)):
          if previous_word_and_freq:
             for word,freq in word_and_freq.items():
                if word in previous_word_and_freq:
@@ -42,10 +52,11 @@ with open("rough_example_data.csv") as infile:
                   freq_rate = (float(freq) / tweet_count)
                   prev_freq_rate = (float(prev_freq) / tweet_count)
                   # If the rate of occurance for the word is increasing by a significant amount, add it to the list
-                  if freq_rate > (prev_freq_rate * exponent_threshold):
-                     print "Frequency of word %s is increasing.  %.1f%% -> %.1f%% of tweets" % (word, prev_freq_rate * 100, freq_rate * 100)
-                     important_terms_to_watch.append(word)
-         # Reset variables for the next 10 minutes
+                  if freq_rate > (prev_freq_rate * exponent_threshold) and freq_rate > .1:
+                     if word not in important_terms_to_watch:
+                        print "Frequency of word %s is increasing.  %.1f%% -> %.1f%% occurrence rate" % (word, prev_freq_rate * 100, freq_rate * 100)
+                        important_terms_to_watch.append(word)
+         # Reset variables for the next time interval
          previous_word_and_freq = word_and_freq
          word_and_freq = dict() 
          initial_time = tweet_time
