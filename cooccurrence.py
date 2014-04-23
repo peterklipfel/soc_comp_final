@@ -10,15 +10,38 @@ import pylab as pl
 
 def get_order_preserving_list():
   allwordpairs = []
-  with open('rough_example_data.csv', 'rb') as csvfile:
+  with open('All_Tweets.csv', 'rb') as csvfile:
     reader = csv.reader(csvfile)
+    i = 0
     for row in reader:
-      data = row[2].split()
+      data = row[1].split()
+      i = i +1
+      if i > 10:
+        break
 
       # [1, 2, 3, 4] -> [(1, 2), (2, 3), (3, 4)]
       rowwordpairs = zip(data[0::1], data[1::1])
-      allwordpairs.extend(rowwordpairs)
+      relevantwordpairs = filter(lambda x: len(x[0])>3 and len(x[1])>3, rowwordpairs)
+      allwordpairs.extend(relevantwordpairs)
   return allwordpairs
+
+def get_non_order_preserving_list():
+  allwordpairs = []
+  with open('All_Tweets.csv', 'rb') as csvfile:
+    reader = csv.reader(csvfile)
+    i = 0
+    for row in reader:
+      data = row[1].split()
+      i = i +1
+      if i > 10:
+        break
+
+      # [1, 2, 3, 4] -> [(1, 2), (2, 3), (3, 4)]
+      rowwordpairs = zip(data[0::1], data[1::1])
+      relevantwordpairs = filter(lambda x: len(x[0])>3 and len(x[1])>3, rowwordpairs)
+      allwordpairs.extend(relevantwordpairs)
+  return allwordpairs
+
 
 def get_order_preserving_hash():
   order_preserving_hash = {}
@@ -67,13 +90,15 @@ def network(graph, labels=None, graph_layout='shell',
   # these are different layouts for the network you may try
   # shell seems to work best
   if graph_layout == 'spring':
-    graph_pos=nx.spring_layout(G, iterations=500)
+    graph_pos=nx.spring_layout(G, iterations=10)
   elif graph_layout == 'spectral':
     graph_pos=nx.spectral_layout(G)
   elif graph_layout == 'random':
     graph_pos=nx.random_layout(G)
   else:
     graph_pos=nx.shell_layout(G)
+
+  print "about to draw"
 
   # draw graph
   nx.draw_networkx_nodes(G,graph_pos,node_size=node_size, 
@@ -93,5 +118,7 @@ def network(graph, labels=None, graph_layout='shell',
   # show graph
   pl.savefig('cooccurringwords.pdf')
 
-network(get_order_preserving_list(), graph_layout="spring", node_size=2500, node_text_size=10)
+# network(get_order_preserving_list(), graph_layout="spring", node_size=2500, node_text_size=10)
 # bar_graph()
+
+print get_order_preserving_hash()
