@@ -1,4 +1,5 @@
 venv
 matplotlibrc
 build
-cooccurringwords.pdf
+cooccurringwords.pdf*
+All_Tweets.csv
