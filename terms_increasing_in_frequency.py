@@ -3,6 +3,7 @@ import fileinput
 import csv
 import re
 from datetime import datetime
+from operator import itemgetter
 
 # Key value pairs that keep track of each word and the number of times it occurs
 word_and_freq = dict()
@@ -17,9 +18,10 @@ tweet_count = 0
 # "Stop Words" to ignore in search
 stop_words = open("english.stop").read().splitlines() + open("spanish.stop").read().splitlines() + ["rt"]
 
-# Array that will carry all the terms that will eventually be added to the search
-important_terms_to_watch = []
-with open("All_Tweets.csv", "rb") as infile:
+# Key value pair that will carry all the terms that will eventually be added to the search, along with 
+# how many times they are reported as increasing
+important_terms_to_watch = dict()
+with open("No_Retweets.csv", "rb") as infile:
    reader = csv.reader(infile, delimiter=",")
    # Ignore first line of csv
    infile.readline()
@@ -53,19 +55,23 @@ with open("All_Tweets.csv", "rb") as infile:
                   prev_freq_rate = (float(prev_freq) / tweet_count)
                   # If the rate of occurance for the word is increasing by a significant amount, add it to the list
                   if freq_rate > (prev_freq_rate * exponent_threshold) and freq_rate > .1:
+                     print "Frequency of word %s is increasing.  %.1f%% -> %.1f%% occurrence rate" % (word, prev_freq_rate * 100, freq_rate * 100)
+                     # Keep track of the words that are increasing in frequency
                      if word not in important_terms_to_watch:
-                        print "Frequency of word %s is increasing.  %.1f%% -> %.1f%% occurrence rate" % (word, prev_freq_rate * 100, freq_rate * 100)
-                        important_terms_to_watch.append(word)
+                        important_terms_to_watch[word] = 1
+                     else:
+                        important_terms_to_watch[word] += 1
          # Reset variables for the next time interval
          previous_word_and_freq = word_and_freq
          word_and_freq = dict() 
          initial_time = tweet_time
          tweet_count = 0
 
-# Make the list of items unique
-important_terms_to_watch = set(important_terms_to_watch)
+# Sort the list of words
+important_terms_to_watch = sorted(important_terms_to_watch.items(), key=itemgetter(1))
 
 # Print out final list
-print "Some terms that are rapidly increasing in frequency which you may want to start monitoring are:"
-for word in important_terms_to_watch:
-   print word
+print "\nSome terms that are rapidly increasing in frequency which you may want to start monitoring are:"
+print "==============================================================================================="
+for word,increases in important_terms_to_watch:
+   print "\"%s\": %d increases" % (word, increases)
