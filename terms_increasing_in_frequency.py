@@ -25,7 +25,10 @@ if frequency_threshold == "":
 frequency_threshold = float(frequency_threshold)
 
 # Change this number to tweak the time intervals that are compared
-time_interval = 3 * 60 * 60
+time_interval = raw_input("Enter a time interval in minutes (How long should terms be collected before comparing to the previous interval)(Default 10800): ")
+if time_interval == "":
+   time_interval = 3 * 60 * 60
+time_interval = int(time_interval)
 
 # Keeps track of the tweets each time period
 tweet_count = 0
@@ -69,7 +72,7 @@ with open("No_Retweets.csv", "rb") as infile:
                   freq_rate = (float(freq) / tweet_count)
                   prev_freq_rate = (float(prev_freq) / tweet_count)
                   # If the rate of occurance for the word is increasing by a significant amount, add it to the list
-                  if freq_rate > (prev_freq_rate * exponent_threshold) and freq_rate > .1:
+                  if freq_rate > (prev_freq_rate * exponent_threshold) and freq_rate > frequency_threshold:
                      print "Frequency of word %15s is increasing.  %.1f%% -> %.1f%% occurrence rate" % (word, prev_freq_rate * 100, freq_rate * 100)
                      # Keep track of the words that are increasing in frequency
                      if word not in important_terms_to_watch:
