@@ -2,6 +2,8 @@
 import fileinput
 import csv
 import re
+import sys
+import time
 from datetime import datetime
 from operator import itemgetter
 
@@ -10,7 +12,23 @@ word_and_freq = dict()
 previous_word_and_freq = dict()
 
 # Change this number to tweak how much a term's popularity must be increasing in order to be added
-exponent_threshold = 10
+exponent_threshold = raw_input("Enter an exponent threshold (By how many times much a number increase in popularity to be added)(Default 10): ")
+if exponent_threshold == "":
+   exponent_threshold = 10
+exponent_threshold = float(exponent_threshold)
+
+# Change this number to tweak the percentage of occurence a term must have among tweets in order to 
+# be added
+frequency_threshold = raw_input("Enter a frequency threshold (What proportion of tweets must contain the term before it is added)(Default 0.1): ")
+if frequency_threshold == "":
+   frequency_threshold = 0.1
+frequency_threshold = float(frequency_threshold)
+
+# Change this number to tweak the time intervals that are compared
+time_interval = raw_input("Enter a time interval in minutes (How long should terms be collected before comparing to the previous interval)(Default 10800): ")
+if time_interval == "":
+   time_interval = 3 * 60 * 60
+time_interval = int(time_interval)
 
 # Keeps track of the tweets each time period
 tweet_count = 0
@@ -21,6 +39,9 @@ stop_words = open("english.stop").read().splitlines() + open("spanish.stop").rea
 # Key value pair that will carry all the terms that will eventually be added to the search, along with 
 # how many times they are reported as increasing
 important_terms_to_watch = dict()
+
+# Term and it's total occurences
+term_total_occurences = dict()
 with open("No_Retweets.csv", "rb") as infile:
    reader = csv.reader(infile, delimiter=",")
    # Ignore first line of csv
@@ -45,17 +66,22 @@ with open("No_Retweets.csv", "rb") as infile:
                word_and_freq[word] += 1
   
       # After time interval has passed, compare the terms 
-      if ((tweet_time - initial_time).seconds > (3 * 60 * 60)):
+      if ((tweet_time - initial_time).seconds > time_interval):
          if previous_word_and_freq:
             for word,freq in word_and_freq.items():
                if word in previous_word_and_freq:
+                  # keep track of the total occurences of each word
+                  if word not in term_total_occurences:
+                     term_total_occurences[word] = freq
+                  else:
+                     term_total_occurences[word] += freq
                   prev_freq = previous_word_and_freq[word]
                   # Calculate the rate of occurance for that word for this 10 mins and last 10 mins
                   freq_rate = (float(freq) / tweet_count)
                   prev_freq_rate = (float(prev_freq) / tweet_count)
                   # If the rate of occurance for the word is increasing by a significant amount, add it to the list
-                  if freq_rate > (prev_freq_rate * exponent_threshold) and freq_rate > .1:
-                     print "Frequency of word %s is increasing.  %.1f%% -> %.1f%% occurrence rate" % (word, prev_freq_rate * 100, freq_rate * 100)
+                  if freq_rate > (prev_freq_rate * exponent_threshold) and freq_rate > frequency_threshold:
+                     print "Frequency of word %15s is increasing.  %.1f%% -> %.1f%% occurrence rate" % (word, prev_freq_rate * 100, freq_rate * 100)
                      # Keep track of the words that are increasing in frequency
                      if word not in important_terms_to_watch:
                         important_terms_to_watch[word] = 1
@@ -67,11 +93,12 @@ with open("No_Retweets.csv", "rb") as infile:
          initial_time = tweet_time
          tweet_count = 0
 
+
 # Sort the list of words
 important_terms_to_watch = sorted(important_terms_to_watch.items(), key=itemgetter(1))
 
 # Print out final list
-print "\nSome terms that are rapidly increasing in frequency which you may want to start monitoring are:"
+print "\nTop Terms Increasing in Frequency:"
 print "==============================================================================================="
 for word,increases in important_terms_to_watch:
-   print "\"%s\": %d increases" % (word, increases)
+   print "%15s: %5d increases. (%5d total occurences)" % (word, increases, term_total_occurences[word])
