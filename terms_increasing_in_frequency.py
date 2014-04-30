@@ -4,6 +4,7 @@ import csv
 import re
 import sys
 import time
+import os
 from datetime import datetime
 from operator import itemgetter
 
@@ -25,16 +26,17 @@ if frequency_threshold == "":
 frequency_threshold = float(frequency_threshold)
 
 # Change this number to tweak the time intervals that are compared
-time_interval = raw_input("Enter a time interval in minutes (How long should terms be collected before comparing to the previous interval)(Default 10800): ")
+time_interval = raw_input("Enter a time interval in minutes (How long should terms be collected before comparing to the previous interval)(Default 180): ")
 if time_interval == "":
    time_interval = 3 * 60 * 60
-time_interval = int(time_interval)
+else:
+   time_interval = int(time_interval) * 60 
 
 # Keeps track of the tweets each time period
 tweet_count = 0
 
 # "Stop Words" to ignore in search
-stop_words = open("english.stop").read().splitlines() + open("spanish.stop").read().splitlines() + ["rt"]
+stop_words = open(os.path.dirname(__file__) + "/stop_words/english.stop").read().splitlines() + open(os.path.dirname(__file__) + "/stop_words/spanish.stop").read().splitlines() + ["rt"]
 
 # Key value pair that will carry all the terms that will eventually be added to the search, along with 
 # how many times they are reported as increasing
