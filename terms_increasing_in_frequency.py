@@ -60,6 +60,7 @@ with open("No_Retweets.csv", "rb") as infile:
 
       # Go through each word and increase it's frequency count
       for word in tweet_body.split():
+         word = word.rstrip(".")
          # ignore stop words
          if word not in stop_words:
             if word not in word_and_freq:
