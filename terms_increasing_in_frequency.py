@@ -4,6 +4,7 @@ import csv
 import re
 import sys
 import time
+import os
 from datetime import datetime
 from operator import itemgetter
 
@@ -17,7 +18,7 @@ if exponent_threshold == "":
    exponent_threshold = 10
 exponent_threshold = float(exponent_threshold)
 
-# Change this number to tweak the percentage of occurence a term must have among tweets in order to 
+# Change this number to tweak the percentage of occurrence a term must have among tweets in order to 
 # be added
 frequency_threshold = raw_input("Enter a frequency threshold (What proportion of tweets must contain the term before it is added)(Default 0.1): ")
 if frequency_threshold == "":
@@ -25,23 +26,24 @@ if frequency_threshold == "":
 frequency_threshold = float(frequency_threshold)
 
 # Change this number to tweak the time intervals that are compared
-time_interval = raw_input("Enter a time interval in minutes (How long should terms be collected before comparing to the previous interval)(Default 10800): ")
+time_interval = raw_input("Enter a time interval in minutes (How long should terms be collected before comparing to the previous interval)(Default 180): ")
 if time_interval == "":
    time_interval = 3 * 60 * 60
-time_interval = int(time_interval)
+else:
+   time_interval = int(time_interval) * 60 
 
 # Keeps track of the tweets each time period
 tweet_count = 0
 
 # "Stop Words" to ignore in search
-stop_words = open("english.stop").read().splitlines() + open("spanish.stop").read().splitlines() + ["rt"]
+stop_words = open(os.path.dirname(__file__) + "/stop_words/english.stop").read().splitlines() + open(os.path.dirname(__file__) + "/stop_words/spanish.stop").read().splitlines() + ["rt"]
 
 # Key value pair that will carry all the terms that will eventually be added to the search, along with 
 # how many times they are reported as increasing
 important_terms_to_watch = dict()
 
-# Term and it's total occurences
-term_total_occurences = dict()
+# Term and it's total occurrences
+term_total_occurrences = dict()
 with open("No_Retweets.csv", "rb") as infile:
    reader = csv.reader(infile, delimiter=",")
    # Ignore first line of csv
@@ -58,23 +60,24 @@ with open("No_Retweets.csv", "rb") as infile:
 
       # Go through each word and increase it's frequency count
       for word in tweet_body.split():
+         word = word.rstrip(".")
          # ignore stop words
          if word not in stop_words:
             if word not in word_and_freq:
                word_and_freq[word] = 1
             else:
                word_and_freq[word] += 1
+               # keep track of the total occurrences of each word
+               if word not in term_total_occurrences:
+                  term_total_occurrences[word] = 1
+               else:
+                  term_total_occurrences[word] += 1
   
       # After time interval has passed, compare the terms 
       if ((tweet_time - initial_time).seconds > time_interval):
          if previous_word_and_freq:
             for word,freq in word_and_freq.items():
                if word in previous_word_and_freq:
-                  # keep track of the total occurences of each word
-                  if word not in term_total_occurences:
-                     term_total_occurences[word] = freq
-                  else:
-                     term_total_occurences[word] += freq
                   prev_freq = previous_word_and_freq[word]
                   # Calculate the rate of occurance for that word for this 10 mins and last 10 mins
                   freq_rate = (float(freq) / tweet_count)
@@ -101,4 +104,4 @@ important_terms_to_watch = sorted(important_terms_to_watch.items(), key=itemgett
 print "\nTop Terms Increasing in Frequency:"
 print "==============================================================================================="
 for word,increases in important_terms_to_watch:
-   print "%15s: %5d increases. (%5d total occurences)" % (word, increases, term_total_occurences[word])
+   print "%15s: %5d increases. (%7d total occurrences)" % (word, increases, term_total_occurrences[word])
