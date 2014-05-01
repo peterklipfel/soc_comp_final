@@ -66,17 +66,17 @@ with open("No_Retweets.csv", "rb") as infile:
                word_and_freq[word] = 1
             else:
                word_and_freq[word] += 1
+               # keep track of the total occurences of each word
+               if word not in term_total_occurences:
+                  term_total_occurences[word] = 1
+               else:
+                  term_total_occurences[word] += 1
   
       # After time interval has passed, compare the terms 
       if ((tweet_time - initial_time).seconds > time_interval):
          if previous_word_and_freq:
             for word,freq in word_and_freq.items():
                if word in previous_word_and_freq:
-                  # keep track of the total occurences of each word
-                  if word not in term_total_occurences:
-                     term_total_occurences[word] = freq
-                  else:
-                     term_total_occurences[word] += freq
                   prev_freq = previous_word_and_freq[word]
                   # Calculate the rate of occurance for that word for this 10 mins and last 10 mins
                   freq_rate = (float(freq) / tweet_count)
@@ -103,4 +103,4 @@ important_terms_to_watch = sorted(important_terms_to_watch.items(), key=itemgett
 print "\nTop Terms Increasing in Frequency:"
 print "==============================================================================================="
 for word,increases in important_terms_to_watch:
-   print "%15s: %5d increases. (%5d total occurences)" % (word, increases, term_total_occurences[word])
+   print "%15s: %5d increases. (%7d total occurences)" % (word, increases, term_total_occurences[word])
