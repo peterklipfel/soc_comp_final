@@ -18,7 +18,7 @@ if exponent_threshold == "":
    exponent_threshold = 10
 exponent_threshold = float(exponent_threshold)
 
-# Change this number to tweak the percentage of occurence a term must have among tweets in order to 
+# Change this number to tweak the percentage of occurrence a term must have among tweets in order to 
 # be added
 frequency_threshold = raw_input("Enter a frequency threshold (What proportion of tweets must contain the term before it is added)(Default 0.1): ")
 if frequency_threshold == "":
@@ -42,8 +42,8 @@ stop_words = open(os.path.dirname(__file__) + "/stop_words/english.stop").read()
 # how many times they are reported as increasing
 important_terms_to_watch = dict()
 
-# Term and it's total occurences
-term_total_occurences = dict()
+# Term and it's total occurrences
+term_total_occurrences = dict()
 with open("No_Retweets.csv", "rb") as infile:
    reader = csv.reader(infile, delimiter=",")
    # Ignore first line of csv
@@ -67,11 +67,11 @@ with open("No_Retweets.csv", "rb") as infile:
                word_and_freq[word] = 1
             else:
                word_and_freq[word] += 1
-               # keep track of the total occurences of each word
-               if word not in term_total_occurences:
-                  term_total_occurences[word] = 1
+               # keep track of the total occurrences of each word
+               if word not in term_total_occurrences:
+                  term_total_occurrences[word] = 1
                else:
-                  term_total_occurences[word] += 1
+                  term_total_occurrences[word] += 1
   
       # After time interval has passed, compare the terms 
       if ((tweet_time - initial_time).seconds > time_interval):
@@ -104,4 +104,4 @@ important_terms_to_watch = sorted(important_terms_to_watch.items(), key=itemgett
 print "\nTop Terms Increasing in Frequency:"
 print "==============================================================================================="
 for word,increases in important_terms_to_watch:
-   print "%15s: %5d increases. (%7d total occurences)" % (word, increases, term_total_occurences[word])
+   print "%15s: %5d increases. (%7d total occurrences)" % (word, increases, term_total_occurrences[word])
