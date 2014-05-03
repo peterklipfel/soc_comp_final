@@ -2,6 +2,7 @@
 import fileinput
 import csv
 import re
+from math import fabs, floor
 from datetime import datetime, timedelta
 
 word_count = dict()
@@ -22,16 +23,15 @@ with open("No_Retweets.csv", "rb") as infile:
 		tweet_count += 1
 		tweet_time = datetime.strptime(line[0].replace("+0000 ", ""), "%a %b %d %H:%M:%S %Y")
 
-
 		# Remove special characters and date
 		tweet_body = re.sub('[^\w .]+', '', line[1])
 
 		# Go through each word and increase its frequency count
 		for word in tweet_body.split():
 			word = word.lower()
-			if len(word) > 3: # Length greater than 3 (and not stop word?)
+			if len(word) > 3: # Length greater than 3
 				if word not in word_count:
-					word_count[word] = [1, "", ""]
+					word_count[word] = [1,tweet_time,tweet_time, 0]
 				else:
 					word_count[word][0] += 1
 					# Time when trending word hits threshold
@@ -40,9 +40,14 @@ with open("No_Retweets.csv", "rb") as infile:
 					# Last time trending word was used
 					if word_count[word][0] > baseline:
 						word_count[word][2] = tweet_time
+				x = word_count[word][2] - word_count[word][1]
+				y = floor(fabs(x.total_seconds() / 3600))
+				if y > 0:
+					z = word_count[word][0] / y
+				word_count[word][3] = y
 
 sorted_word_count = word_count.items()
 sorted_word_count.sort(key = lambda item: item[1])
 for word,freq in sorted_word_count:
 	if freq[0] > baseline:
-		print "Word: %s Freq: %i Time: %s Last Used: %s" %(word,freq[0], freq[1], freq[2])
+		print "Word: %s Freq: %i Baseline Time: %s Avg: %s uses per minute" %(word,freq[0], freq[1], freq[3])
