@@ -14,19 +14,25 @@ DUMP_BINS = True
 DICTIONARY_FILE = "wordDict"
 BIN_FILE = "wordBins"
 
-# nouns = set()
+# used for binning
 nouns = {}
 nouns = defaultdict(lambda: 0, nouns)
 
+# used to track full dictionary of nouns
 allNouns = {}
 allNouns = defaultdict(lambda: 0, allNouns)
 
 nounsBins = []
 
+# Words that the bigram will
 disaster_words = ["earthquake", "terremoto", "sismo"]
+
+# filters out all words that have numbers
+# or more than 3 of the same letter in a row
 regex = re.compile("\d")
 regex2 = re.compile("(.)\1{3,}")
 
+# aggressively filters non-useful words
 def isNotGarbage(x):
   return ((regex.search(x)==None) and
     ('_' not in x) and
@@ -34,6 +40,7 @@ def isNotGarbage(x):
     (len(x)<10)and(len(x)>4) and
     (regex.search(x)==None) )
 
+# bins the nouns
 def split_list():
   global nouns
   important_nouns = filter(lambda x: nouns[x] > 3, nouns)
@@ -42,17 +49,19 @@ def split_list():
   nouns = {}
   nouns = defaultdict(lambda: 0, nouns)
 
+# get first element of a list if the list isn't empty
 def first(l):
   if len(l) > 0:
     return l[0]
   else:
     return None
 
+# Will print over itself every 100 tweets to show progress
 def print_progress(i):
   if PRINT_PROGRESS and i%100 == 0:
     sys.stdout.write("\rParsed tweets: %i" % i)
     sys.stdout.flush()
-  
+
 
 with open('tweets/No_Retweets.csv', 'rb') as csvfile:
   reader = csv.reader(csvfile)
@@ -63,6 +72,7 @@ with open('tweets/No_Retweets.csv', 'rb') as csvfile:
       split_list()
     if i > TWEET_LIMIT:
       break
+
     print_progress(i)
 
     text = nltk.word_tokenize(row[1])
@@ -73,6 +83,8 @@ with open('tweets/No_Retweets.csv', 'rb') as csvfile:
     disasterpairs = []
     print_tweet = True
     for x in rowwordpairs:
+      # words will be on one side of the tuple or the other, this grabs the
+      # tagged word in the bigram that isn't a disaster word
       if first(re.findall("[a-zA-Z]+", x[0][0].lower())) in disaster_words:
         disasterpairs.append(x[1])
         print_tweet = False
@@ -95,8 +107,6 @@ with open('tweets/No_Retweets.csv', 'rb') as csvfile:
 
     i = i+1
 
-# print nounsBins
-# print set(nounsBins[0]).union(set(nounsBins[1])).union(set(nounsBins[2])).union(set(nounsBins[3]))
 if DUMP_BINS:
   f = open(BIN_FILE, 'w')
   f.write(repr(nounsBins))
